@@ -311,8 +311,23 @@ function checkCollision() {
 
 
 // ------------------------------------
-// MOVE XP ORB
+// MOVE AND COLLECT XP ORB
 // ------------------------------------
+function collectOrb() {
+
+    // Small collection animation
+    orb.style.transform = "scale(1.8)";
+    orb.style.opacity = "0";
+
+    setTimeout(() => {
+
+        moveOrb();
+
+        orb.style.transform = "scale(1)";
+        orb.style.opacity = "1";
+
+    }, 200);
+}
 
 function moveOrb() {
 
