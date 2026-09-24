@@ -9,7 +9,45 @@ let speed = 1.5;
 let score = 0;
 
 let nextDirectionChange = 0;
-let pauseUntil = 0;
+
+let currentFrame = 0;
+let lastFrameTime = 0;
+
+const frameWidth = 96;
+const frameHeight = 96;
+
+const framesPerAnimation = 8;
+
+
+// ------------------------------------
+// CAT ANIMATION
+// ------------------------------------
+
+function animateCat(timestamp) {
+
+    if (timestamp - lastFrameTime > 100) {
+
+        currentFrame =
+            (currentFrame + 1) % framesPerAnimation;
+
+        updateSprite();
+
+        lastFrameTime = timestamp;
+    }
+}
+
+
+// ------------------------------------
+// DISPLAY CURRENT SPRITE FRAME
+// ------------------------------------
+
+function updateSprite() {
+
+    const x = currentFrame * frameWidth;
+
+    cat.style.backgroundPosition =
+        `-${x}px 0px`;
+}
 
 
 // ------------------------------------
@@ -18,30 +56,25 @@ let pauseUntil = 0;
 
 function moveCat(timestamp) {
 
-    // Occasionally change direction
     if (timestamp > nextDirectionChange) {
 
-        direction = Math.random() < 0.5 ? -1 : 1;
+        direction =
+            Math.random() < 0.5 ? -1 : 1;
 
-        // Slightly different speed each time
-        speed = 1 + Math.random() * 2;
+        speed =
+            1 + Math.random() * 2;
 
-        // Choose when the next change happens
         nextDirectionChange =
             timestamp + 1500 + Math.random() * 3000;
     }
 
 
-    // Occasionally pause
-    if (timestamp > pauseUntil) {
-
-        catX += direction * speed;
-
-    }
+    catX += direction * speed;
 
 
-    // Keep cat inside the screen
-    const maxX = window.innerWidth - 60;
+    const maxX =
+        window.innerWidth - 96;
+
 
     if (catX <= 0) {
 
@@ -49,6 +82,7 @@ function moveCat(timestamp) {
         direction = 1;
 
     }
+
 
     if (catX >= maxX) {
 
@@ -63,6 +97,8 @@ function moveCat(timestamp) {
 
     checkCollision();
 
+    animateCat(timestamp);
+
     requestAnimationFrame(moveCat);
 }
 
@@ -73,8 +109,12 @@ function moveCat(timestamp) {
 
 function checkCollision() {
 
-    const catRect = cat.getBoundingClientRect();
-    const orbRect = orb.getBoundingClientRect();
+    const catRect =
+        cat.getBoundingClientRect();
+
+    const orbRect =
+        orb.getBoundingClientRect();
+
 
     const touching =
         catRect.left < orbRect.right &&
@@ -90,9 +130,7 @@ function checkCollision() {
         scoreDisplay.textContent = score;
 
         moveOrb();
-
     }
-
 }
 
 
@@ -103,20 +141,23 @@ function checkCollision() {
 function moveOrb() {
 
     const x =
-        Math.random() * (window.innerWidth - 50);
+        Math.random() *
+        (window.innerWidth - 50);
+
 
     const y =
-        120 + Math.random() *
+        120 +
+        Math.random() *
         (window.innerHeight - 200);
+
 
     orb.style.left = `${x}px`;
     orb.style.top = `${y}px`;
-
 }
 
 
 // ------------------------------------
-// START GAME
+// START
 // ------------------------------------
 
 moveOrb();
