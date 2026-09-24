@@ -2,33 +2,115 @@ const cat = document.getElementById("cat");
 const orb = document.getElementById("orb");
 const scoreDisplay = document.getElementById("score");
 
+// ------------------------------------
+// CAT MOVEMENT
+// ------------------------------------
+
 let catX = 0;
 let direction = 1;
 let speed = 1.5;
 
+// ------------------------------------
+// GAME
+// ------------------------------------
+
 let score = 0;
 
-let nextDirectionChange = 0;
+// ------------------------------------
+// CAT STATE
+// ------------------------------------
 
-let currentFrame = 0;
-let lastFrameTime = 0;
+let catState = "walking";
+
+let stateStartedAt = performance.now();
+
+const states = {
+    walking: {
+        row: 0,
+        duration: null,
+        frameSpeed: 100
+    },
+
+    idle: {
+        row: 1,
+        duration: 2000,
+        frameSpeed: 180
+    },
+
+    sitting: {
+        row: 2,
+        duration: 3000,
+        frameSpeed: 250
+    },
+
+    licking: {
+        row: 3,
+        duration: 2500,
+        frameSpeed: 180
+    }
+};
+
+// ------------------------------------
+// SPRITE
+// ------------------------------------
 
 const frameWidth = 96;
 const frameHeight = 96;
 
 const framesPerAnimation = 8;
 
+let currentFrame = 0;
+let lastFrameTime = 0;
+
 
 // ------------------------------------
-// CAT ANIMATION
+// CHANGE STATE
+// ------------------------------------
+
+function changeState(newState) {
+
+    catState = newState;
+
+    stateStartedAt = performance.now();
+
+    currentFrame = 0;
+
+    updateSprite();
+}
+
+
+// ------------------------------------
+// UPDATE SPRITE
+// ------------------------------------
+
+function updateSprite() {
+
+    const state = states[catState];
+
+    const x = currentFrame * frameWidth;
+    const y = state.row * frameHeight;
+
+    cat.style.backgroundPosition =
+        `-${x}px -${y}px`;
+}
+
+
+// ------------------------------------
+// ANIMATION
 // ------------------------------------
 
 function animateCat(timestamp) {
 
-    if (timestamp - lastFrameTime > 100) {
+    const state = states[catState];
+
+    if (
+        timestamp - lastFrameTime >
+        state.frameSpeed
+    ) {
 
         currentFrame =
-            (currentFrame + 1) % framesPerAnimation;
+            (currentFrame + 1) %
+            framesPerAnimation;
 
         updateSprite();
 
@@ -38,38 +120,63 @@ function animateCat(timestamp) {
 
 
 // ------------------------------------
-// DISPLAY CURRENT SPRITE FRAME
+// STATE BEHAVIOR
 // ------------------------------------
 
-function updateSprite() {
+function updateState(timestamp) {
 
-    const x = currentFrame * frameWidth;
+    const state = states[catState];
 
-    cat.style.backgroundPosition =
-        `-${x}px 0px`;
+    if (
+        state.duration !== null &&
+        timestamp - stateStartedAt >= state.duration
+    ) {
+
+        if (catState === "idle") {
+
+            changeState("sitting");
+
+        } else if (catState === "sitting") {
+
+            changeState("licking");
+
+        } else if (catState === "licking") {
+
+            changeState("walking");
+
+        }
+    }
 }
 
 
 // ------------------------------------
-// CAT MOVEMENT
+// MOVEMENT
 // ------------------------------------
+
+let nextDirectionChange = 0;
 
 function moveCat(timestamp) {
 
-    if (timestamp > nextDirectionChange) {
+    updateState(timestamp);
 
-        direction =
-            Math.random() < 0.5 ? -1 : 1;
+    if (catState === "walking") {
 
-        speed =
-            1 + Math.random() * 2;
+        if (timestamp > nextDirectionChange) {
 
-        nextDirectionChange =
-            timestamp + 1500 + Math.random() * 3000;
+            direction =
+                Math.random() < 0.5 ? -1 : 1;
+
+            speed =
+                1 + Math.random() * 2;
+
+            nextDirectionChange =
+                timestamp +
+                1500 +
+                Math.random() * 3000;
+        }
+
+        catX += direction * speed;
     }
-
-
-    catX += direction * speed;
 
 
     const maxX =
@@ -144,12 +251,10 @@ function moveOrb() {
         Math.random() *
         (window.innerWidth - 50);
 
-
     const y =
         120 +
         Math.random() *
         (window.innerHeight - 200);
-
 
     orb.style.left = `${x}px`;
     orb.style.top = `${y}px`;
@@ -161,5 +266,7 @@ function moveOrb() {
 // ------------------------------------
 
 moveOrb();
+
+changeState("walking");
 
 requestAnimationFrame(moveCat);
