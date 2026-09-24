@@ -221,8 +221,13 @@ function moveCat(timestamp) {
 
 
     cat.style.left = `${catX}px`;
-
-
+    
+    if (direction === 1) {
+        cat.style.transform = "scaleX(1)";
+    } else {
+        cat.style.transform = "scaleX(-1)";
+    }
+    
     checkCollision();
 
     animateCat(timestamp);
