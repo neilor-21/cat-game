@@ -127,24 +127,45 @@ function updateState(timestamp) {
 
     const state = states[catState];
 
+    // Walking → Idle
+    if (catState === "walking") {
+
+        // Small random chance to stop walking
+        if (Math.random() < 0.002) {
+
+            changeState("idle");
+        }
+
+        return;
+    }
+
+    // Idle → Sitting
     if (
-        state.duration !== null &&
+        catState === "idle" &&
         timestamp - stateStartedAt >= state.duration
     ) {
 
-        if (catState === "idle") {
+        changeState("sitting");
+        return;
+    }
 
-            changeState("sitting");
+    // Sitting → Licking
+    if (
+        catState === "sitting" &&
+        timestamp - stateStartedAt >= state.duration
+    ) {
 
-        } else if (catState === "sitting") {
+        changeState("licking");
+        return;
+    }
 
-            changeState("licking");
+    // Licking → Walking
+    if (
+        catState === "licking" &&
+        timestamp - stateStartedAt >= state.duration
+    ) {
 
-        } else if (catState === "licking") {
-
-            changeState("walking");
-
-        }
+        changeState("walking");
     }
 }
 
