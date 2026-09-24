@@ -216,6 +216,35 @@ function updateState(timestamp) {
 // ------------------------------------
 // MOVEMENT
 // ------------------------------------
+function moveTowardOrb() {
+
+    const catRect =
+        cat.getBoundingClientRect();
+
+    const orbRect =
+        orb.getBoundingClientRect();
+
+    const catCenter =
+        catRect.left + catRect.width / 2;
+
+    const orbCenter =
+        orbRect.left + orbRect.width / 2;
+
+    const distance =
+        orbCenter - catCenter;
+
+    // Only react when the orb is reasonably close
+    if (Math.abs(distance) < 250) {
+
+        if (distance > 0) {
+            direction = 1;
+        } else {
+            direction = -1;
+        }
+
+        speed = 2.2;
+    }
+}
 
 let nextDirectionChange = 0;
 
@@ -225,20 +254,28 @@ function moveCat(timestamp) {
 
     if (catState === "walking") {
 
-        if (timestamp > nextDirectionChange) {
-
+        moveTowardOrb();
+    
+        if (
+            timestamp > nextDirectionChange &&
+            Math.abs(
+                orb.getBoundingClientRect().left -
+                cat.getBoundingClientRect().left
+            ) >= 250
+        ) {
+        
             direction =
                 Math.random() < 0.5 ? -1 : 1;
-
+        
             speed =
                 1 + Math.random() * 2;
-
+        
             nextDirectionChange =
                 timestamp +
                 1500 +
                 Math.random() * 3000;
         }
-
+    
         catX += direction * speed;
     }
 
