@@ -305,7 +305,7 @@ function checkCollision() {
 
         scoreDisplay.textContent = score;
 
-        moveOrb();
+        collectOrb();
     }
 }
 
