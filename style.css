@@ -60,15 +60,12 @@ body {
 
 .orb {
     position: absolute;
-
     left: 50%;
     top: 50%;
-
     font-size: 25px;
-
     user-select: none;
-
     animation: float 1.5s ease-in-out infinite;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 @keyframes float {
