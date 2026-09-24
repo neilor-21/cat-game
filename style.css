@@ -42,12 +42,20 @@ body {
 .cat {
     position: absolute;
 
-    bottom: 45px;
+    width: 96px;
+    height: 96px;
+
+    bottom: 35px;
     left: 0;
 
-    font-size: 48px;
+    background-image: url("assets/cat-sprite-clean.png");
+    background-repeat: no-repeat;
+    background-size: 768px 384px;
+
+    image-rendering: pixelated;
 
     user-select: none;
+    pointer-events: none;
 }
 
 .orb {
