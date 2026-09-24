@@ -48,7 +48,7 @@ body {
     bottom: 35px;
     left: 0;
 
-    background-image: url("assets/cat-sprite-clean.png");
+    background-image: url("assets/cat-sprite-normalized.png");
     background-repeat: no-repeat;
     background-size: 768px 384px;
 
