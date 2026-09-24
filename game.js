@@ -335,10 +335,9 @@ function moveOrb() {
         Math.random() *
         (window.innerWidth - 50);
 
+    // Keep the orb near the cat's walking level
     const y =
-        120 +
-        Math.random() *
-        (window.innerHeight - 200);
+        window.innerHeight - 120;
 
     orb.style.left = `${x}px`;
     orb.style.top = `${y}px`;
