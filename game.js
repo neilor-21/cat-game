@@ -127,10 +127,12 @@ function updateState(timestamp) {
 
     const state = states[catState];
 
-    // Walking → Idle
+    // ------------------------------------
+    // WALKING
+    // ------------------------------------
+
     if (catState === "walking") {
 
-        // Small random chance to stop walking
         if (Math.random() < 0.002) {
 
             changeState("idle");
@@ -139,27 +141,68 @@ function updateState(timestamp) {
         return;
     }
 
-    // Idle → Sitting
+
+    // ------------------------------------
+    // IDLE
+    // ------------------------------------
+
     if (
         catState === "idle" &&
         timestamp - stateStartedAt >= state.duration
     ) {
 
-        changeState("sitting");
+        const randomChoice = Math.random();
+
+        if (randomChoice < 0.45) {
+
+            // Just start walking again
+            changeState("walking");
+
+        } else if (randomChoice < 0.75) {
+
+            // Sit for a while
+            changeState("sitting");
+
+        } else {
+
+            // Sit → licking
+            changeState("sitting");
+        }
+
         return;
     }
 
-    // Sitting → Licking
+
+    // ------------------------------------
+    // SITTING
+    // ------------------------------------
+
     if (
         catState === "sitting" &&
         timestamp - stateStartedAt >= state.duration
     ) {
 
-        changeState("licking");
+        const randomChoice = Math.random();
+
+        if (randomChoice < 0.5) {
+
+            // Walk away
+            changeState("walking");
+
+        } else {
+
+            // Start licking paws
+            changeState("licking");
+        }
+
         return;
     }
 
-    // Licking → Walking
+
+    // ------------------------------------
+    // LICKING
+    // ------------------------------------
+
     if (
         catState === "licking" &&
         timestamp - stateStartedAt >= state.duration
