@@ -9,6 +9,7 @@ const scoreDisplay = document.getElementById("score");
 let catX = 0;
 let direction = 1;
 let speed = 1.5;
+let targetSpeed = 1.5;
 
 
 // ------------------------------------
@@ -273,7 +274,7 @@ function moveTowardOrb() {
         }
 
         // Move faster toward XP
-        speed = 2.2;
+        targetSpeed = 2.2;
     }
 }
 
@@ -367,20 +368,22 @@ function moveCat(timestamp) {
         // ------------------------------------
     
         if (catState === "walking") {
-    
+
+            targetSpeed = 1.5;
+        
             if (
                 timestamp > nextDirectionChange &&
                 distance >= 250
             ) {
-    
+        
                 direction =
                     Math.random() < 0.5
                         ? -1
                         : 1;
-    
-                speed =
+        
+                targetSpeed =
                     1 + Math.random() * 2;
-    
+        
                 nextDirectionChange =
                     timestamp +
                     1500 +
@@ -388,7 +391,7 @@ function moveCat(timestamp) {
             }
         }
     
-    
+        speed += (targetSpeed - speed) * 0.05;
         catX += direction * speed;
     }
 
