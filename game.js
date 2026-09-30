@@ -156,6 +156,19 @@ function updateState(timestamp) {
 
 
     // ------------------------------------
+    // APPROACHING
+    // ------------------------------------
+
+    if (catState === "approaching") {
+
+        // Let moveCat() handle the movement.
+        // We don't need a timer here.
+
+        return;
+    }
+
+
+    // ------------------------------------
     // IDLE
     // ------------------------------------
 
@@ -171,14 +184,9 @@ function updateState(timestamp) {
             // Walk again
             changeState("walking");
 
-        } else if (randomChoice < 0.75) {
-
-            // Sit
-            changeState("sitting");
-
         } else {
 
-            // Sit before possibly licking
+            // Sit
             changeState("sitting");
         }
 
@@ -224,7 +232,6 @@ function updateState(timestamp) {
         changeState("walking");
     }
 }
-
 
 // ------------------------------------
 // MOVE TOWARD XP ORB
