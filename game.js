@@ -10,11 +10,14 @@ let catX = 0;
 let direction = 1;
 let speed = 1.5;
 
+
 // ------------------------------------
 // GAME
 // ------------------------------------
 
 let score = 0;
+let collectingOrb = false;
+
 
 // ------------------------------------
 // CAT STATE
@@ -25,6 +28,7 @@ let catState = "walking";
 let stateStartedAt = performance.now();
 
 const states = {
+
     walking: {
         row: 0,
         duration: null,
@@ -48,7 +52,9 @@ const states = {
         duration: 2500,
         frameSpeed: 180
     }
+
 };
+
 
 // ------------------------------------
 // SPRITE
@@ -127,6 +133,7 @@ function updateState(timestamp) {
 
     const state = states[catState];
 
+
     // ------------------------------------
     // WALKING
     // ------------------------------------
@@ -155,17 +162,17 @@ function updateState(timestamp) {
 
         if (randomChoice < 0.45) {
 
-            // Just start walking again
+            // Walk again
             changeState("walking");
 
         } else if (randomChoice < 0.75) {
 
-            // Sit for a while
+            // Sit
             changeState("sitting");
 
         } else {
 
-            // Sit → licking
+            // Sit before possibly licking
             changeState("sitting");
         }
 
@@ -191,7 +198,7 @@ function updateState(timestamp) {
 
         } else {
 
-            // Start licking paws
+            // Lick paws
             changeState("licking");
         }
 
@@ -214,8 +221,9 @@ function updateState(timestamp) {
 
 
 // ------------------------------------
-// MOVEMENT
+// MOVE TOWARD XP ORB
 // ------------------------------------
+
 function moveTowardOrb() {
 
     const catRect =
@@ -224,21 +232,29 @@ function moveTowardOrb() {
     const orbRect =
         orb.getBoundingClientRect();
 
+
     const catCenter =
-        catRect.left + catRect.width / 2;
+        catRect.left +
+        catRect.width / 2;
 
     const orbCenter =
-        orbRect.left + orbRect.width / 2;
+        orbRect.left +
+        orbRect.width / 2;
+
 
     const distance =
         orbCenter - catCenter;
+
 
     // Only react when the orb is reasonably close
     if (Math.abs(distance) < 250) {
 
         if (distance > 0) {
+
             direction = 1;
+
         } else {
+
             direction = -1;
         }
 
@@ -246,16 +262,34 @@ function moveTowardOrb() {
     }
 }
 
+
+// ------------------------------------
+// RANDOM DIRECTION CHANGE
+// ------------------------------------
+
 let nextDirectionChange = 0;
+
+
+// ------------------------------------
+// CAT MOVEMENT LOOP
+// ------------------------------------
 
 function moveCat(timestamp) {
 
     updateState(timestamp);
 
+
+    // ------------------------------------
+    // WALKING
+    // ------------------------------------
+
     if (catState === "walking") {
 
+        // Check whether XP orb is nearby
         moveTowardOrb();
-    
+
+
+        // Random wandering when orb isn't nearby
         if (
             timestamp > nextDirectionChange &&
             Math.abs(
@@ -263,22 +297,28 @@ function moveCat(timestamp) {
                 cat.getBoundingClientRect().left
             ) >= 250
         ) {
-        
+
             direction =
                 Math.random() < 0.5 ? -1 : 1;
-        
+
             speed =
                 1 + Math.random() * 2;
-        
+
             nextDirectionChange =
                 timestamp +
                 1500 +
                 Math.random() * 3000;
         }
-    
+
+
+        // Move the cat
         catX += direction * speed;
     }
 
+
+    // ------------------------------------
+    // SCREEN BOUNDARIES
+    // ------------------------------------
 
     const maxX =
         window.innerWidth - 96;
@@ -287,30 +327,60 @@ function moveCat(timestamp) {
     if (catX <= 0) {
 
         catX = 0;
-        direction = 1;
 
+        direction = 1;
     }
 
 
     if (catX >= maxX) {
 
         catX = maxX;
+
         direction = -1;
-
     }
 
 
-    cat.style.left = `${catX}px`;
-    
+    // ------------------------------------
+    // APPLY POSITION
+    // ------------------------------------
+
+    cat.style.left =
+        `${catX}px`;
+
+
+    // ------------------------------------
+    // FACE MOVEMENT DIRECTION
+    // ------------------------------------
+
     if (direction === 1) {
-        cat.style.transform = "scaleX(1)";
+
+        cat.style.transform =
+            "scaleX(1)";
+
     } else {
-        cat.style.transform = "scaleX(-1)";
+
+        cat.style.transform =
+            "scaleX(-1)";
     }
-    
+
+
+    // ------------------------------------
+    // CHECK XP COLLISION
+    // ------------------------------------
+
     checkCollision();
 
+
+    // ------------------------------------
+    // UPDATE ANIMATION
+    // ------------------------------------
+
     animateCat(timestamp);
+
+
+    // ------------------------------------
+    // NEXT FRAME
+    // ------------------------------------
 
     requestAnimationFrame(moveCat);
 }
@@ -321,6 +391,12 @@ function moveCat(timestamp) {
 // ------------------------------------
 
 function checkCollision() {
+
+    // Prevent repeated collection
+    if (collectingOrb) {
+        return;
+    }
+
 
     const catRect =
         cat.getBoundingClientRect();
@@ -340,7 +416,8 @@ function checkCollision() {
 
         score++;
 
-        scoreDisplay.textContent = score;
+        scoreDisplay.textContent =
+            score;
 
         collectOrb();
     }
@@ -348,41 +425,65 @@ function checkCollision() {
 
 
 // ------------------------------------
-// MOVE AND COLLECT XP ORB
+// COLLECT XP ORB
 // ------------------------------------
+
 function collectOrb() {
 
-    // Small collection animation
-    orb.style.transform = "scale(1.8)";
-    orb.style.opacity = "0";
+    collectingOrb = true;
+
+
+    // Collection animation
+    orb.style.transform =
+        "scale(1.8)";
+
+    orb.style.opacity =
+        "0";
+
 
     setTimeout(() => {
 
         moveOrb();
 
-        orb.style.transform = "scale(1)";
-        orb.style.opacity = "1";
+        orb.style.transform =
+            "scale(1)";
+
+        orb.style.opacity =
+            "1";
+
+        collectingOrb = false;
 
     }, 200);
 }
 
+
+// ------------------------------------
+// MOVE XP ORB
+// ------------------------------------
+
 function moveOrb() {
 
+    // Random horizontal position
     const x =
         Math.random() *
         (window.innerWidth - 50);
 
-    // Keep the orb near the cat's walking level
+
+    // Keep orb near cat's walking level
     const y =
         window.innerHeight - 120;
 
-    orb.style.left = `${x}px`;
-    orb.style.top = `${y}px`;
+
+    orb.style.left =
+        `${x}px`;
+
+    orb.style.top =
+        `${y}px`;
 }
 
 
 // ------------------------------------
-// START
+// START GAME
 // ------------------------------------
 
 moveOrb();
