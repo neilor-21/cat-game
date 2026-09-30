@@ -35,6 +35,12 @@ const states = {
         frameSpeed: 100
     },
 
+    approaching: {
+        row: 0,
+        duration: null,
+        frameSpeed: 80
+    },
+
     idle: {
         row: 1,
         duration: 2000,
@@ -246,9 +252,10 @@ function moveTowardOrb() {
         orbCenter - catCenter;
 
 
-    // Only react when the orb is reasonably close
+    // XP is nearby
     if (Math.abs(distance) < 250) {
 
+        // Face the orb
         if (distance > 0) {
 
             direction = 1;
@@ -258,6 +265,7 @@ function moveTowardOrb() {
             direction = -1;
         }
 
+        // Move faster toward XP
         speed = 2.2;
     }
 }
@@ -283,35 +291,97 @@ function moveCat(timestamp) {
     // WALKING
     // ------------------------------------
 
-    if (catState === "walking") {
+    if (
+    catState === "walking" ||
+    catState === "approaching") {
 
-        // Check whether XP orb is nearby
-        moveTowardOrb();
+        const catRect =
+            cat.getBoundingClientRect();
+    
+        const orbRect =
+            orb.getBoundingClientRect();
+    
+    
+        const catCenter =
+            catRect.left +
+            catRect.width / 2;
+    
+        const orbCenter =
+            orbRect.left +
+            orbRect.width / 2;
+    
+    
+        const distance =
+            Math.abs(orbCenter - catCenter);
 
 
-        // Random wandering when orb isn't nearby
+        // ------------------------------------
+        // NOTICE XP
+        // ------------------------------------
+    
         if (
-            timestamp > nextDirectionChange &&
-            Math.abs(
-                orb.getBoundingClientRect().left -
-                cat.getBoundingClientRect().left
-            ) >= 250
+            catState === "walking" &&
+            distance < 250
         ) {
-
-            direction =
-                Math.random() < 0.5 ? -1 : 1;
-
-            speed =
-                1 + Math.random() * 2;
-
-            nextDirectionChange =
-                timestamp +
-                1500 +
-                Math.random() * 3000;
+    
+            changeState("approaching");
         }
-
-
-        // Move the cat
+    
+    
+        // ------------------------------------
+        // APPROACH XP
+        // ------------------------------------
+    
+        if (catState === "approaching") {
+    
+            if (orbCenter > catCenter) {
+    
+                direction = 1;
+    
+            } else {
+    
+                direction = -1;
+            }
+    
+            speed = 2.2;
+    
+    
+            // Once close enough, return control
+            // to the normal collision system
+            if (distance < 20) {
+    
+                speed = 1.5;
+            }
+        }
+    
+    
+        // ------------------------------------
+        // NORMAL WANDERING
+        // ------------------------------------
+    
+        if (catState === "walking") {
+    
+            if (
+                timestamp > nextDirectionChange &&
+                distance >= 250
+            ) {
+    
+                direction =
+                    Math.random() < 0.5
+                        ? -1
+                        : 1;
+    
+                speed =
+                    1 + Math.random() * 2;
+    
+                nextDirectionChange =
+                    timestamp +
+                    1500 +
+                    Math.random() * 3000;
+            }
+        }
+    
+    
         catX += direction * speed;
     }
 
