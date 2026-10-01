@@ -3,18 +3,20 @@ const orb = document.getElementById("orb");
 const scoreDisplay = document.getElementById("score");
 const levelDisplay = document.getElementById("level");
 
+
 // ------------------------------------
 // CAT MOVEMENT
 // ------------------------------------
 
 let catX = 0;
 let direction = 1;
+
 let speed = 1.5;
 let targetSpeed = 1.5;
 
 
 // ------------------------------------
-// GAME
+// XP SYSTEM
 // ------------------------------------
 
 let score = 0;
@@ -31,21 +33,30 @@ let collectingOrb = false;
 // ------------------------------------
 
 function addXP(amount) {
+
     score += amount;
 
-    //Calculate level
-    const new_level = Math.floor(score / XP_PER_LEVEL) + 1;
+    // Calculate level
+    const newLevel =
+        Math.floor(score / XP_PER_LEVEL) + 1;
 
-    //Check for level up
-    if (newlevel > level) {
-        level = new_level;
 
-        console.log(`LEVEL UP! You are now Level ${level}`);
+    // Check for level up
+    if (newLevel > level) {
+
+        level = newLevel;
+
+        console.log(
+            `LEVEL UP! You are now Level ${level}`
+        );
+
     } else {
-        level = new_level;
+
+        level = newLevel;
     }
 
-    //Update HUD
+
+    // Update HUD
     scoreDisplay.textContent = score;
     levelDisplay.textContent = level;
 }
@@ -193,8 +204,7 @@ function updateState(timestamp) {
 
     if (catState === "approaching") {
 
-        // Let moveCat() handle the movement.
-        // We don't need a timer here.
+        // Movement is handled by moveCat()
 
         return;
     }
@@ -213,12 +223,10 @@ function updateState(timestamp) {
 
         if (randomChoice < 0.45) {
 
-            // Walk again
             changeState("walking");
 
         } else {
 
-            // Sit
             changeState("sitting");
         }
 
@@ -239,12 +247,10 @@ function updateState(timestamp) {
 
         if (randomChoice < 0.5) {
 
-            // Walk away
             changeState("walking");
 
         } else {
 
-            // Lick paws
             changeState("licking");
         }
 
@@ -262,50 +268,6 @@ function updateState(timestamp) {
     ) {
 
         changeState("walking");
-    }
-}
-
-// ------------------------------------
-// MOVE TOWARD XP ORB
-// ------------------------------------
-
-function moveTowardOrb() {
-
-    const catRect =
-        cat.getBoundingClientRect();
-
-    const orbRect =
-        orb.getBoundingClientRect();
-
-
-    const catCenter =
-        catRect.left +
-        catRect.width / 2;
-
-    const orbCenter =
-        orbRect.left +
-        orbRect.width / 2;
-
-
-    const distance =
-        orbCenter - catCenter;
-
-
-    // XP is nearby
-    if (Math.abs(distance) < 250) {
-
-        // Face the orb
-        if (distance > 0) {
-
-            direction = 1;
-
-        } else {
-
-            direction = -1;
-        }
-
-        // Move faster toward XP
-        targetSpeed = 2.2;
     }
 }
 
@@ -327,29 +289,30 @@ function moveCat(timestamp) {
 
 
     // ------------------------------------
-    // WALKING
+    // WALKING / APPROACHING
     // ------------------------------------
 
     if (
-    catState === "walking" ||
-    catState === "approaching") {
+        catState === "walking" ||
+        catState === "approaching"
+    ) {
 
         const catRect =
             cat.getBoundingClientRect();
-    
+
         const orbRect =
             orb.getBoundingClientRect();
-    
-    
+
+
         const catCenter =
             catRect.left +
             catRect.width / 2;
-    
+
         const orbCenter =
             orbRect.left +
             orbRect.width / 2;
-    
-    
+
+
         const distance =
             Math.abs(orbCenter - catCenter);
 
@@ -357,73 +320,86 @@ function moveCat(timestamp) {
         // ------------------------------------
         // NOTICE XP
         // ------------------------------------
-    
+
         if (
             catState === "walking" &&
             distance < 250
         ) {
-    
+
             changeState("approaching");
         }
-    
-    
+
+
         // ------------------------------------
         // APPROACH XP
         // ------------------------------------
-    
+
         if (catState === "approaching") {
-    
+
             if (orbCenter > catCenter) {
-    
+
                 direction = 1;
-    
+
             } else {
-    
+
                 direction = -1;
             }
-    
-            speed = 2.2;
-    
-    
-            // Once close enough, return control
-            // to the normal collision system
+
+
+            // Move toward orb smoothly
+            targetSpeed = 2.2;
+
+
+            // Once very close, slow down
             if (distance < 20) {
-    
-                speed = 1.5;
+
+                targetSpeed = 1.5;
             }
         }
-    
-    
+
+
         // ------------------------------------
         // NORMAL WANDERING
         // ------------------------------------
-    
+
         if (catState === "walking") {
 
             targetSpeed = 1.5;
-        
+
+
             if (
                 timestamp > nextDirectionChange &&
                 distance >= 250
             ) {
-        
+
                 direction =
                     Math.random() < 0.5
                         ? -1
                         : 1;
-        
+
+
                 targetSpeed =
                     1 + Math.random() * 2;
-        
+
+
                 nextDirectionChange =
                     timestamp +
                     1500 +
                     Math.random() * 3000;
             }
         }
-    
-        speed += (targetSpeed - speed) * 0.05;
-        catX += direction * speed;
+
+
+        // ------------------------------------
+        // SMOOTH ACCELERATION
+        // ------------------------------------
+
+        speed +=
+            (targetSpeed - speed) * 0.05;
+
+
+        catX +=
+            direction * speed;
     }
 
 
@@ -505,6 +481,7 @@ function checkCollision() {
 
     // Prevent repeated collection
     if (collectingOrb) {
+
         return;
     }
 
@@ -524,7 +501,8 @@ function checkCollision() {
 
 
     if (touching) {
-        addCP(XP_PER_ORB);
+
+        addXP(XP_PER_ORB);
 
         collectOrb();
     }
@@ -552,13 +530,19 @@ function collectOrb() {
 
         moveOrb();
 
+
         orb.style.transform =
             "scale(1)";
 
         orb.style.opacity =
             "1";
 
+
         collectingOrb = false;
+
+
+        // Return to normal wandering
+        changeState("walking");
 
     }, 200);
 }
