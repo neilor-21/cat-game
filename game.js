@@ -1,6 +1,7 @@
 const cat = document.getElementById("cat");
 const orb = document.getElementById("orb");
 const scoreDisplay = document.getElementById("score");
+const levelDisplay = document.getElementById("level");
 
 // ------------------------------------
 // CAT MOVEMENT
@@ -17,7 +18,37 @@ let targetSpeed = 1.5;
 // ------------------------------------
 
 let score = 0;
+let level = 1;
+
+const XP_PER_ORB = 10;
+const XP_PER_LEVEL = 100;
+
 let collectingOrb = false;
+
+
+// ------------------------------------
+// ADD XP
+// ------------------------------------
+
+function addXP(amount) {
+    score += amount;
+
+    //Calculate level
+    const new_level = Math.floor(score / XP_PER_LEVEL) + 1;
+
+    //Check for level up
+    if (newlevel > level) {
+        level = new_level;
+
+        console.log(`LEVEL UP! You are now Level ${level}`);
+    } else {
+        level = new_level;
+    }
+
+    //Update HUD
+    scoreDisplay.textContent = score;
+    levelDisplay.textContent = level;
+}
 
 
 // ------------------------------------
@@ -493,11 +524,7 @@ function checkCollision() {
 
 
     if (touching) {
-
-        score++;
-
-        scoreDisplay.textContent =
-            score;
+        addCP(XP_PER_ORB);
 
         collectOrb();
     }
